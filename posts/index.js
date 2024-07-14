@@ -1,39 +1,46 @@
-import cors from 'cors';
-import { randomBytes } from 'crypto';
-import express from 'express';
+import axios from "axios";
+import cors from "cors";
+import { randomBytes } from "crypto";
+import express from "express";
+
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 
-const posts = {
-    '123': {
-        id: '123',
-        title: 'Hello'
-    },
-    '456': {
-        id: '456',
-        title: 'Hi'
-    }
-};
+const posts = {};
 
-app.get('/posts', (req, res) => {
+app.get("/posts", (req, res) => {
     res.send(posts);
 });
 
-app.post('/posts', (req, res) => {
-    const id = randomBytes(4).toString('hex');
+app.post("/posts", async (req, res) => {
+    const id = randomBytes(4).toString("hex");
     const { title } = req.body;
 
     posts[id] = {
         id,
-        title
+        title,
     };
+
+    await axios.post("http://localhost:4005/events", {
+        type: "PostCreated",
+        data: {
+            id,
+            title,
+        },
+    });
 
     res.status(201).send(posts[id]);
 });
 
+app.post("/events", (req, res) => {
+    console.log("Received Event", req.body.type);
+
+    res.send({});
+});
+
 app.listen(4000, () => {
-    console.log('Listening on 4000');
+    console.log("Listening on 4000");
 });

@@ -1,12 +1,14 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
-import api from "./api/api";
+import CommentCreate from "./CommentCreate";
+import CommentList from "./CommentList";
 
 const PostList = () => {
   const [posts, setPosts] = useState({});
 
   const fetchPosts = async () => {
-    const res = await api.get("/posts");
-
+    const res = await axios.get("http://localhost:4002/posts");
+    console.log(res.data);
     setPosts(res.data);
   };
 
@@ -17,21 +19,21 @@ const PostList = () => {
   const renderedPosts = Object.values(posts).map((post) => {
     return (
       <div
-        className="border-2 p-2 text-black font-bold"
+        className="card"
         style={{ width: "30%", marginBottom: "20px" }}
         key={post.id}
       >
-        <div className="p-2">
+        <div className="card-body">
           <h3>{post.title}</h3>
+          <CommentList comments={post.comments} />
+          <CommentCreate postId={post.id} />
         </div>
       </div>
     );
   });
 
-  console.log(renderedPosts);
-
   return (
-    <div className="flex-col justify-center">
+    <div className="d-flex flex-row flex-wrap justify-content-between">
       {renderedPosts}
     </div>
   );
